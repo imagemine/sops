@@ -1,10 +1,10 @@
-FROM golang:1.20
+FROM golang:1.20 as builder
 
 COPY . /go/src/go.mozilla.org/sops
 WORKDIR /go/src/go.mozilla.org/sops
-
 RUN CGO_ENABLED=1 make install
-RUN apt-get update
-RUN apt-get install -y vim python3-pip emacs
-RUN pip install awscli
-ENV EDITOR vim
+
+FROM golang:1.20
+WORKDIR /app
+COPY --from=builder /go/bin/sops /app/sops
+ENTRYPOINT ["/app/sops"]
